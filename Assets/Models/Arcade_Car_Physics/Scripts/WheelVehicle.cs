@@ -170,8 +170,8 @@ public class WheelVehicle : MonoBehaviour
     // Update everything
     void FixedUpdate()
     {
-        Debug.Log("torque = " + driveWheel[0].motorTorque / 602f);
-        Debug.Log("Steering angle = " + turnWheel[0].steerAngle / steerAngle);
+        // Debug.Log("torque = " + driveWheel[0].motorTorque / 602f);
+        // Debug.Log("Steering angle = " + turnWheel[0].steerAngle / steerAngle);
         // Mesure current speed
         speed = transform.InverseTransformDirection(_rb.velocity).z * 3.6f;
 

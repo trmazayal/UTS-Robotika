@@ -434,7 +434,7 @@ public class CarAgent : Agent
         //Debug.Log("Lane offset = " + m_laneOffset);
         //Debug.Log("Angular velocity = " + (transform.InverseTransformDirection(m_carRigidbody.angularVelocity)/3f).y);
         //m_dirToTarget = (m_checkpointPos - transform.localPosition).normalized;
-        Debug.Log("Dot product (agent forward,dirToTarget) = "+Vector3.Dot(transform.forward, m_dirToTarget)); 
+        // Debug.Log("Dot product (agent forward,dirToTarget) = "+Vector3.Dot(transform.forward, m_dirToTarget)); 
         //Debug.Log("Velocity = " + transform.InverseTransformDirection(m_carRigidbody.velocity)/20f);
         //Debug.Log("Steering = " + m_carController.GetSteeringAngle());
         //Debug.Log("Torque = " + m_carController.GetTorque());
