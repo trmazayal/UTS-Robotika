@@ -32,26 +32,28 @@ public class RoadGenerator : MonoBehaviour
     private MeshFilter[] m_mesh = new MeshFilter[3];
     private ObstacleGenerator m_obstacle;
 
+    public Checkpoints currentCheckpoints;
+
     void Start()
     {
-        m_curves = transform.GetComponent<CurveHandler>();
-        if (m_isRoadBoundary)
-        {
-            GameObject m_roadBoundary = new GameObject("Road Boundary");
-            m_roadBoundary.AddComponent<MeshCollider>();
-            m_roadBoundary.AddComponent<MeshFilter>();
-            m_roadBoundary.tag = "Obstacle";
-            m_roadBoundary.isStatic = true;
+        // m_curves = transform.GetComponent<CurveHandler>();
+        // if (m_isRoadBoundary)
+        // {
+        //     GameObject m_roadBoundary = new GameObject("Road Boundary");
+        //     m_roadBoundary.AddComponent<MeshCollider>();
+        //     m_roadBoundary.AddComponent<MeshFilter>();
+        //     m_roadBoundary.tag = "Obstacle";
+        //     m_roadBoundary.isStatic = true;
 
-            // Create gameobjects for boundary of road. One for left and one for right boundary
-            Instantiate(m_roadBoundary, transform);
-            Instantiate(m_roadBoundary, transform);
+        //     // Create gameobjects for boundary of road. One for left and one for right boundary
+        //     Instantiate(m_roadBoundary, transform);
+        //     Instantiate(m_roadBoundary, transform);
 
-            GameObject.Destroy(m_roadBoundary);
-        }
-        m_mesh = transform.GetComponentsInChildren<MeshFilter>();
-        m_meshCollider = transform.GetComponentsInChildren<MeshCollider>();
-        m_obstacle = transform.parent.GetComponentInChildren<ObstacleGenerator>();
+        //     GameObject.Destroy(m_roadBoundary);
+        // }
+        // m_mesh = transform.GetComponentsInChildren<MeshFilter>();
+        // m_meshCollider = transform.GetComponentsInChildren<MeshCollider>();
+        // m_obstacle = transform.parent.GetComponentInChildren<ObstacleGenerator>();
 
         //GenTrack();
     }
@@ -59,85 +61,85 @@ public class RoadGenerator : MonoBehaviour
     /// <summary>
     /// Generate the road
     /// </summary>
-    public void GenTrack(int _sortOrder)
-    {
-        // Clear all variables every time a new road is made
-        ResetVariables();
+    // public void GenTrack(int _sortOrder)
+    // {
+    //     // Clear all variables every time a new road is made
+    //     ResetVariables();
 
-        // Sorting order clockwise or anti-clockwise
-        m_curves.sortOrder = _sortOrder;
+    //     // Sorting order clockwise or anti-clockwise
+    //     m_curves.sortOrder = _sortOrder;
 
-        // Generate catmull rom spline from the convexhull points
-        m_curves.GenerateSpline();
+    //     // Generate catmull rom spline from the convexhull points
+    //     m_curves.GenerateSpline();
 
-        GenMesh();
+    //     GenMesh();
 
-        GenWaypoints();
-    }
+    //     GenWaypoints();
+    // }
 
     /// <summary>
     /// Remaps given value between a new range
     /// </summary>
-    public float Map(float _value, float _from1, float _to1, float _from2, float _to2)
-    {
-        return (_value - _from1) / (_to1 - _from1) * (_to2 - _from2) + _from2;
-    }
+    // public float Map(float _value, float _from1, float _to1, float _from2, float _to2)
+    // {
+    //     return (_value - _from1) / (_to1 - _from1) * (_to2 - _from2) + _from2;
+    // }
 
-    private void ResetVariables()
-    {
-        m_mesh[0].mesh.Clear();
-        if (m_isRoadBoundary)
-        {
-            m_mesh[1].mesh.Clear();
-            m_mesh[2].mesh.Clear();
-        }
-        vertices.Clear();
-        waypoints.Clear();
-        m_obstacle.waypointOnSpline.Clear();
+    // private void ResetVariables()
+    // {
+    //     m_mesh[0].mesh.Clear();
+    //     if (m_isRoadBoundary)
+    //     {
+    //         m_mesh[1].mesh.Clear();
+    //         m_mesh[2].mesh.Clear();
+    //     }
+    //     vertices.Clear();
+    //     waypoints.Clear();
+    //     m_obstacle.waypointOnSpline.Clear();
 
-        foreach (Transform child in m_waypointParent)
-            GameObject.Destroy(child.gameObject);
-    }
+    //     foreach (Transform child in m_waypointParent)
+    //         GameObject.Destroy(child.gameObject);
+    // }
 
     /// <summary>
     /// Generates the checkpoints on the road
     /// </summary>
-    private void GenWaypoints()
-    {
-        // Creating the gameobject to instantiate on road
-        GameObject _waypoint = new GameObject("Waypoint");
-        _waypoint.layer = 10;
-        _waypoint.tag = "Waypoint";
-        _waypoint.AddComponent<BoxCollider>();
-        _waypoint.isStatic = true;
-        BoxCollider _waypointcol = _waypoint.GetComponent<BoxCollider>();
-        _waypointcol.size = new Vector3(2 * halfRoadWidth, 2 * halfRoadWidth, 0.1f);
-        _waypointcol.isTrigger = true;
+    // private void GenWaypoints()
+    // {
+    //     // Creating the gameobject to instantiate on road
+    //     GameObject _waypoint = new GameObject("Waypoint");
+    //     _waypoint.layer = 10;
+    //     _waypoint.tag = "Waypoint";
+    //     _waypoint.AddComponent<BoxCollider>();
+    //     _waypoint.isStatic = true;
+    //     BoxCollider _waypointcol = _waypoint.GetComponent<BoxCollider>();
+    //     _waypointcol.size = new Vector3(2 * halfRoadWidth, 2 * halfRoadWidth, 0.1f);
+    //     _waypointcol.isTrigger = true;
 
-        // Instantiating the checkpoints along the road with proper rotation
-        Quaternion _rot;
-        Vector3 _vec1;
-        Vector3 _vec2;
-        Vector3 _vec3;
-        for (int i = 8; i < m_curves.splinePoints.Count - 5; i += 5)
-        {
-            // Waypoint position
-            _vec1 = new Vector3(m_curves.splinePoints[i + 1].x, 0f, m_curves.splinePoints[i + 1].y);
-            _vec2 = new Vector3(m_curves.splinePoints[i - 1].x, 0f, m_curves.splinePoints[i - 1].y);
-            _vec3 = ((new Vector3(m_curves.splinePoints[i].x, 0f, m_curves.splinePoints[i].y) - _vec2) +
-                     (_vec1 - new Vector3(m_curves.splinePoints[i].x, 0f, m_curves.splinePoints[i].y))) / 2f;
+    //     // Instantiating the checkpoints along the road with proper rotation
+    //     Quaternion _rot;
+    //     Vector3 _vec1;
+    //     Vector3 _vec2;
+    //     Vector3 _vec3;
+    //     for (int i = 8; i < m_curves.splinePoints.Count - 5; i += 5)
+    //     {
+    //         // Waypoint position
+    //         _vec1 = new Vector3(m_curves.splinePoints[i + 1].x, 0f, m_curves.splinePoints[i + 1].y);
+    //         _vec2 = new Vector3(m_curves.splinePoints[i - 1].x, 0f, m_curves.splinePoints[i - 1].y);
+    //         _vec3 = ((new Vector3(m_curves.splinePoints[i].x, 0f, m_curves.splinePoints[i].y) - _vec2) +
+    //                  (_vec1 - new Vector3(m_curves.splinePoints[i].x, 0f, m_curves.splinePoints[i].y))) / 2f;
 
-            // Rotation
-            _rot = Quaternion.LookRotation(transform.TransformDirection(_vec3.normalized), Vector3.up);
+    //         // Rotation
+    //         _rot = Quaternion.LookRotation(transform.TransformDirection(_vec3.normalized), Vector3.up);
 
-            waypoints.Add(Instantiate(_waypoint, transform.TransformPoint(new Vector3(m_curves.splinePoints[i].x, halfRoadWidth, m_curves.splinePoints[i].y)), _rot, m_waypointParent).transform);
+    //         waypoints.Add(Instantiate(_waypoint, transform.TransformPoint(new Vector3(m_curves.splinePoints[i].x, halfRoadWidth, m_curves.splinePoints[i].y)), _rot, m_waypointParent).transform);
 
-            // Which spline point the waypoint is on
-            m_obstacle.waypointOnSpline.Add(i);
-        }
+    //         // Which spline point the waypoint is on
+    //         m_obstacle.waypointOnSpline.Add(i);
+    //     }
 
-        GameObject.Destroy(_waypoint);
-    }
+    //     GameObject.Destroy(_waypoint);
+    // }
 
     /// <summary>
     /// Generates road mesh from the generated spline points

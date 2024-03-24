@@ -29,12 +29,14 @@ public class CarAgent : Agent
     private int m_deadCounter;
     // private ObstacleGenerator m_obstacleGen;
     private Rigidbody m_carRigidbody;
-    private RoadGenerator m_roadGen;
+    [SerializeField] private Checkpoints m_roadGen;
     private Transform m_nextCheckpoint;
     private Vector2 m_move;
     private Vector3 m_checkpointPos;
     private WheelCollider[] m_wheelColliders;
     private WheelHit m_out;
+
+    // private CheckpointManager m_checkpointManager;
 
     //private Vector3 m_prevCheckpointPos;
     //private Vector3 m_prevToNextCheckpoint;
@@ -45,18 +47,16 @@ public class CarAgent : Agent
 
     public override void Initialize()
     {
-        m_roadGen = m_road.GetComponent<RoadGenerator>();
         m_carController = GetComponent<WheelVehicle>();
         m_carRigidbody = GetComponentInChildren<Rigidbody>();
         m_wheelColliders = GetComponentsInChildren<WheelCollider>();
-        // m_obstacleGen = m_obstacles.GetComponent<ObstacleGenerator>();
     }
 
     public override void OnEpisodeBegin()
     {
         // RoadAndObstacleReset();
-        ResetAll();
-        PrivateVariableReset();
+        // ResetAll();
+        // PrivateVariableReset();
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -101,25 +101,6 @@ public class CarAgent : Agent
         sensor.AddObservation(m_angularVelocity.y); // float
     }
 
-    // private void RoadAndObstacleReset()
-    // {
-    //     // Randomly select clockwise or anti-clockwise sorting of control points of spline
-    //     float _rand = UnityEngine.Random.Range(-1f, 1f);
-
-    //     // Generates the road 
-    //     // m_roadGen.GenTrack((int)(Mathf.Sign(_rand) * Mathf.Ceil(Mathf.Abs(_rand))));
-
-    //     // Randomly sets road with obstacles or no obstacles (0 for no obstalces
-    //     //                                                    1 for static obstacles
-    //     //                                                    2 for moving obstacles)
-    //     m_obstacleGen.obstacleState = 1; //UnityEngine.Random.Range(1, 2);
-    //     m_obstacleGen.obstacleDensity = UnityEngine.Random.Range(0.6f, 1.1f);
-    //     m_obstacleGen.ObstacleStateChange();
-
-    //     // Sets random speed for obstacles
-    //     //m_obstacleGen.obstacleSpeed = UnityEngine.Random.Range(0.1f, 2f);
-    // }
-
     private void PrivateVariableReset()
     {
         // Step count of episode
@@ -148,7 +129,7 @@ public class CarAgent : Agent
     private void ResetAll()
     {
         // Resets checkpoints
-        m_nextCheckpoint = m_roadGen.waypoints[0];
+        m_nextCheckpoint = m_roadGen.checkPoints[0].transform;
         m_nextCheckpointNumber = 1;
 
         // Resets agent velocities
@@ -160,31 +141,6 @@ public class CarAgent : Agent
         {
             tempcol.brakeTorque = Mathf.Infinity;
         }
-
-        // Assign random start point (around the beggining of the road) for agent with random rotation
-
-        // Midpoint of 4 vertices of the road
-        transform.localPosition = ((m_roadGen.vertices[4] + m_roadGen.vertices[5] + m_roadGen.vertices[6] + m_roadGen.vertices[7]) / 4f);
-
-        // Rotation facing the incoming checkpoint 
-        transform.localRotation = Quaternion.LookRotation((((m_nextCheckpoint.localPosition) - new Vector3(0, m_roadGen.halfRoadWidth, 0)) - transform.localPosition).normalized, Vector3.up);
-
-        // Place the agent above the road
-        transform.localPosition += new Vector3(0, 0.8f, 0);
-
-        // Randomize the position of the agent
-        transform.localPosition += transform.right * UnityEngine.Random.Range((-m_roadGen.halfRoadWidth + 2f), (m_roadGen.halfRoadWidth - 2f));
-
-        // Randomize rotation
-        transform.Rotate(new Vector3(0f, UnityEngine.Random.Range(-45f, 45f), 0f));
-
-        // Assigns starting checkpoint
-        m_checkpointPos = (new Vector3(m_nextCheckpoint.localPosition.x, transform.localPosition.y, m_nextCheckpoint.localPosition.z));
-        //m_prevCheckpointPos = transform.localPosition;
-
-        // Assigns target position
-        m_target.transform.localPosition = ((m_roadGen.vertices[m_roadGen.vertices.Count - 1] + m_roadGen.vertices[m_roadGen.vertices.Count - 2] + m_roadGen.vertices[m_roadGen.vertices.Count - 3] + m_roadGen.vertices[m_roadGen.vertices.Count - 4]) / 4f);
-        m_target.transform.localPosition += new Vector3(0, 0.5f, 0);
     }
 
     private void OnCollisionStay(Collision collision)
@@ -221,7 +177,7 @@ public class CarAgent : Agent
     {
         if (other.CompareTag("Finish"))
         {
-            if (m_roadGen.waypoints.Count < m_nextCheckpointNumber)
+            if (m_roadGen.checkPoints.Count < m_nextCheckpointNumber)
             {
                 // A set reward for reaching the final target + extra reward based on how quickly the agent reached the target
                 m_currentReward += 1f + ((30f * m_nextCheckpointNumber) / Mathf.Clamp(m_steps, 1, Mathf.Infinity));
@@ -274,9 +230,9 @@ public class CarAgent : Agent
         //m_prevCheckpointPos = m_checkpointPos;
 
         // If there are more checkpoints to be crossed then assign the incoming checkpoint
-        if (m_roadGen.waypoints.Count > m_nextCheckpointNumber)
+        if (m_roadGen.checkPoints.Count > m_nextCheckpointNumber)
         {
-            m_nextCheckpoint = m_roadGen.waypoints[m_nextCheckpointNumber];
+            m_nextCheckpoint = m_roadGen.checkPoints[m_nextCheckpointNumber].transform;
             m_checkpointPos = (new Vector3(m_nextCheckpoint.localPosition.x, transform.localPosition.y, m_nextCheckpoint.localPosition.z));
             m_nextCheckpointNumber++;
 
@@ -368,18 +324,18 @@ public class CarAgent : Agent
                 break;
             }
 
-            // else
-            // {
-            //     tempcol.GetGroundHit(out m_out);
+            else
+            {
+                tempcol.GetGroundHit(out m_out);
 
-            //     if (m_out.collider.CompareTag("DeadZone"))
-            //     {
-            //         NextEpisode(-1f);
+                if (m_out.collider.CompareTag("Finish"))
+                {
+                    NextEpisode(-1f);
 
-            //         //m_currentReward += -0.5f;
-            //         //AddReward(-0.5f);
-            //     }
-            // }
+                    //m_currentReward += -0.5f;
+                    //AddReward(-0.5f);
+                }
+            }
         }
     }
 
