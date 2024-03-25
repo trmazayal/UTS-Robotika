@@ -13,6 +13,8 @@ public class CarAgent : Agent
     // [SerializeField] private bool m_allGrounded = false;
     [SerializeField] private int m_obstacleHit;
 
+    private SpawnPointManager m_spawnPointManager;
+
     private WheelVehicle m_carController;
     private int m_steps;
     private Vector2 m_move;
@@ -22,13 +24,26 @@ public class CarAgent : Agent
 
     public override void Initialize()
     {
+        m_spawnPointManager = FindObjectOfType<SpawnPointManager>();
         m_carController = GetComponent<WheelVehicle>();
         m_carRigidbody = GetComponentInChildren<Rigidbody>();
         m_wheelColliders = GetComponentsInChildren<WheelCollider>();
     }
 
+    public void Respawn()
+    {
+        Vector3 spawnPosition = m_spawnPointManager.SelectRandomSpawnpoint();
+        transform.position = spawnPosition;
+        transform.rotation = Quaternion.identity;
+        m_carRigidbody.velocity = Vector3.zero;
+        m_carRigidbody.angularVelocity = Vector3.zero;
+    }
+
     public override void OnEpisodeBegin()
     {
+        Respawn();
+        m_obstacleHit = 0;
+        m_steps = 0;
     }
 
     public override void OnActionReceived(ActionBuffers actions)
