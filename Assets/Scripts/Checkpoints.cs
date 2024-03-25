@@ -5,10 +5,28 @@ using UnityEngine;
 
 public class Checkpoints : MonoBehaviour
 {
-    public List<Checkpoint> checkPoints;
+    public List<Checkpoint> checkpointList;
+    // private List<Checkpoint> checkpointList;
     
     private void Awake()
     {
-        checkPoints = new List<Checkpoint>(GetComponentsInChildren<Checkpoint>());
+        // Transform checkpointsTransform = transform.Find("Checkpoints");
+
+        // foreach (Transform checkpointTransform in checkpointsTransform)
+        // {
+        //     Checkpoint checkpoint = checkpointsTransform.GetComponent<Checkpoint>();
+
+        //     checkpoint.SetCheckpoints(this);
+
+        //     checkpointList.Add(checkpoint);
+        // }
+        checkpointList = new List<Checkpoint>(GetComponentsInChildren<Checkpoint>());
+
+
+    }
+
+    public void PlayerThroughCheckpoint(Checkpoint checkpoint)
+    {
+        Debug.Log(checkpointList.IndexOf(checkpoint));
     }
 }

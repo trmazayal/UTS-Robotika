@@ -19,7 +19,8 @@ public class CheckpointManager : MonoBehaviour
 
     void Start()
     {
-        Checkpoints = FindObjectOfType<Checkpoints>().checkPoints;
+        Debug.Log("Star Checkpoint Manager!");
+        Checkpoints = FindObjectOfType<Checkpoints>().checkpointList;
         ResetCheckpoints();
     }
 
@@ -44,6 +45,7 @@ public class CheckpointManager : MonoBehaviour
 
     public void CheckPointReached(Checkpoint checkpoint)
     {
+        Debug.Log("Reached Checkpoint!");
         if (nextCheckPointToReach != checkpoint) return;
         
         lastCheckpoint = Checkpoints[CurrentCheckpointIndex];
@@ -57,6 +59,7 @@ public class CheckpointManager : MonoBehaviour
         }
         else
         {
+            Debug.Log("Correct Checkpoint!");
             kartAgent.AddReward((0.5f) / Checkpoints.Count);
             SetNextCheckpoint();
         }
