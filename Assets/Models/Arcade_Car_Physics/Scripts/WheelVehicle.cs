@@ -64,7 +64,7 @@ public class WheelVehicle : MonoBehaviour
 
     // Max steering hangle, usualy higher for drift car
     [Range(0f, 50.0f)]
-    [SerializeField] float steerAngle = 30.0f;
+    [SerializeField] float steerAngle = 45.0f;
     public float SteerAngle { get { return steerAngle; } set { steerAngle = Mathf.Clamp(value, 0.0f, 50.0f); } }
 
     // The value used in the steering Lerp, 1 is instant (Strong power steering), and 0 is not turning at all
@@ -74,9 +74,9 @@ public class WheelVehicle : MonoBehaviour
 
 
     // How hard do you want to drift?
-    [Range(0.0f, 2f)]
-    [SerializeField] float driftIntensity = 1f;
-    public float DriftIntensity { get { return driftIntensity; } set { driftIntensity = Mathf.Clamp(value, 0.0f, 2.0f); } }
+    // [Range(0.0f, 2f)]
+    // [SerializeField] float driftIntensity = 1f;
+    // public float DriftIntensity { get { return driftIntensity; } set { driftIntensity = Mathf.Clamp(value, 0.0f, 2.0f); } }
 
     // Reset Values
     Vector3 spawnPosition;
@@ -107,9 +107,9 @@ public class WheelVehicle : MonoBehaviour
     public bool Handbrake { get { return handbrake; } set { handbrake = value; } }
 
     // Use this to disable drifting
-    [HideInInspector] public bool allowDrift = true;
-    bool drift;
-    public bool Drift { get { return drift; } set { drift = value; } }
+    // [SerializeField] bool allowDrift = true;
+    // bool drift;
+    // public bool Drift { get { return drift; } set { drift = value; } }
 
     // Use this to read the current car speed (you'll need this to make a speedometer)
     [SerializeField] float speed = 0.0f;
@@ -217,34 +217,35 @@ public class WheelVehicle : MonoBehaviour
         }
 
         // Drift
-        if (drift && allowDrift)
-        {
-            Vector3 driftForce = -transform.right;
-            driftForce.y = 0.0f;
-            driftForce.Normalize();
+        // if (drift && allowDrift)
+        // {
+        //     Debug.Log("Drifting");
+        //     Vector3 driftForce = -transform.right;
+        //     driftForce.y = 0.0f;
+        //     driftForce.Normalize();
 
-            if (steering != 0)
-                driftForce *= _rb.mass * speed / 7f * throttle * steering / steerAngle;
-            Vector3 driftTorque = transform.up * 0.1f * steering / steerAngle;
+        //     if (steering != 0)
+        //         driftForce *= _rb.mass * speed / 7f * throttle * steering / steerAngle;
+        //     Vector3 driftTorque = transform.up * 0.1f * steering / steerAngle;
 
 
-            _rb.AddForce(driftForce * driftIntensity, ForceMode.Force);
-            _rb.AddTorque(driftTorque * driftIntensity, ForceMode.VelocityChange);
-        }
+        //     _rb.AddForce(driftForce * driftIntensity, ForceMode.Force);
+        //     _rb.AddTorque(driftTorque * driftIntensity, ForceMode.VelocityChange);
+        // }
 
         // Downforce
         _rb.AddForce(-transform.up * speed * downforce);
     }
 
-    // Reposition the car to the start position
-    public void ResetPos()
-    {
-        transform.position = spawnPosition;
-        transform.rotation = spawnRotation;
+    // // Reposition the car to the start position
+    // public void ResetPos()
+    // {
+    //     transform.position = spawnPosition;
+    //     transform.rotation = spawnRotation;
 
-        _rb.velocity = Vector3.zero;
-        _rb.angularVelocity = Vector3.zero;
-    }
+    //     _rb.velocity = Vector3.zero;
+    //     _rb.angularVelocity = Vector3.zero;
+    // }
 
     public void toogleHandbrake(bool h)
     {
