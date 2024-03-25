@@ -10,7 +10,7 @@ public class CarAgent : Agent
     /// private variables
     /// </summary>
 
-    // [SerializeField] private bool m_allGrounded = false;
+    [SerializeField] private bool m_allGrounded = false;
     [SerializeField] private int m_obstacleHit;
 
     private SpawnPointManager m_spawnPointManager;
@@ -20,7 +20,7 @@ public class CarAgent : Agent
     private Vector2 m_move;
     private Rigidbody m_carRigidbody;
     private WheelCollider[] m_wheelColliders;
-
+    private WheelHit m_out;
 
     public override void Initialize()
     {
@@ -108,6 +108,38 @@ public class CarAgent : Agent
     }
 
     /// <summary>
+    /// Checks if all wheel colliders are grounded and if all wheels are touching the road or not
+    /// </summary>
+    private void CheckGrounded()
+    {
+        foreach (WheelCollider tempcol in m_wheelColliders)
+        {
+            if (transform.position.y >= 1f || transform.position.y <= 0f)
+            {
+                NextEpisode(-1f);
+            }
+
+            if (!tempcol.isGrounded)
+            {
+                m_allGrounded = false;
+                break;
+            }
+
+            else
+            {
+                tempcol.GetGroundHit(out m_out);
+
+                if (m_out.collider.CompareTag("Finish"))
+                {
+                    NextEpisode(-1f);
+
+                    //m_currentReward += -0.5f;
+                    //AddReward(-0.5f);
+                }
+            }
+        }
+    }
+    /// <summary>
     /// Sets the reward to the given value and ends the episode
     /// </summary>
     private void NextEpisode(float _reward)
@@ -120,11 +152,10 @@ public class CarAgent : Agent
     private void FixedUpdate()
     {
         m_steps++;
-
-        // m_allGrounded = true;
+        m_allGrounded = true;
+        CheckGrounded();
 
         // InfiniteRewardCheck();
-        // CheckGrounded();
         // CheckMovement();
     }
 }
