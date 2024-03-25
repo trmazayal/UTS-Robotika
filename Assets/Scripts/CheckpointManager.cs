@@ -8,7 +8,7 @@ public class CheckpointManager : MonoBehaviour
     public float MaxTimeToReachNextCheckpoint = 30f;
     public float TimeLeft = 30f;
     
-    public CarAgent kartAgent;
+    public CarAgent carAgent;
     public Checkpoint nextCheckPointToReach;
     
     private int CurrentCheckpointIndex;
@@ -19,7 +19,6 @@ public class CheckpointManager : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("Star Checkpoint Manager!");
         Checkpoints = FindObjectOfType<Checkpoints>().checkpointList;
         ResetCheckpoints();
     }
@@ -38,29 +37,30 @@ public class CheckpointManager : MonoBehaviour
 
         if (TimeLeft < 0f)
         {
-            kartAgent.AddReward(-1f);
-            kartAgent.EndEpisode();
+            carAgent.AddReward(-1f);
+            carAgent.EndEpisode();
         }
     }
 
     public void CheckPointReached(Checkpoint checkpoint)
     {
-        Debug.Log("Reached Checkpoint!");
-        if (nextCheckPointToReach != checkpoint) return;
-        
+        if (nextCheckPointToReach != checkpoint) {
+            // Debug.Log("Wrong Checkpoint!"+ checkpoint.name + " Expected: " + nextCheckPointToReach.name);
+            return;
+        }
         lastCheckpoint = Checkpoints[CurrentCheckpointIndex];
         reachedCheckpoint?.Invoke(checkpoint);
         CurrentCheckpointIndex++;
 
         if (CurrentCheckpointIndex >= Checkpoints.Count)
         {
-            kartAgent.AddReward(0.5f);
-            kartAgent.EndEpisode();
+            carAgent.AddReward(0.5f);
+            carAgent.EndEpisode();
         }
         else
         {
-            Debug.Log("Correct Checkpoint!");
-            kartAgent.AddReward((0.5f) / Checkpoints.Count);
+            // Debug.Log("Correct Checkpoint! "+ checkpoint.name);
+            carAgent.AddReward((0.5f) / Checkpoints.Count);
             SetNextCheckpoint();
         }
     }

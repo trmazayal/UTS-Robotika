@@ -16,6 +16,7 @@ public class CarAgent : Agent
     [SerializeField] private int m_obstacleHit;
 
     private SpawnPointManager m_spawnPointManager;
+    private CheckpointManager m_checkpointManager;
 
     private WheelVehicle m_carController;
     private int m_steps;
@@ -27,6 +28,7 @@ public class CarAgent : Agent
     public override void Initialize()
     {
         m_spawnPointManager = FindObjectOfType<SpawnPointManager>();
+        m_checkpointManager = FindObjectOfType<CheckpointManager>();
         m_carController = GetComponent<WheelVehicle>();
         m_carRigidbody = GetComponentInChildren<Rigidbody>();
         m_wheelColliders = GetComponentsInChildren<WheelCollider>();
@@ -43,6 +45,7 @@ public class CarAgent : Agent
 
     public override void OnEpisodeBegin()
     {
+        m_checkpointManager.ResetCheckpoints();
         Respawn();
         m_obstacleHit = 0;
         m_steps = 0;
@@ -65,7 +68,17 @@ public class CarAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
+        sensor.AddObservation(m_carRigidbody.velocity);
+        sensor.AddObservation(m_carRigidbody.angularVelocity);
+        sensor.AddObservation(m_carRigidbody.position);
+        sensor.AddObservation(m_carRigidbody.rotation);
+        sensor.AddObservation(m_obstacleHit);
+        sensor.AddObservation(m_steps);
 
+        sensor.AddObservation(m_checkpointManager.TimeLeft);
+        sensor.AddObservation(m_checkpointManager.MaxTimeToReachNextCheckpoint);
+
+        sensor.AddObservation(m_allGrounded);
     }
 
 
@@ -99,7 +112,7 @@ public class CarAgent : Agent
         {
         }
 
-        else if (other.CompareTag("Waypoint"))
+        else if (other.CompareTag("Checkpoint"))
         {
         }
 
@@ -118,7 +131,16 @@ public class CarAgent : Agent
         {
             if (transform.position.y >= 1f || transform.position.y <= 0f)
             {
-                NextEpisode(-1f);
+                tempcol.GetGroundHit(out m_out);
+                if (m_out.collider.CompareTag("Road"))
+                {
+                    m_allGrounded = true;
+                }
+                else
+                {
+                    NextEpisode(-1f);
+                    break;
+                }
             }
 
             if (!tempcol.isGrounded)
@@ -144,7 +166,7 @@ public class CarAgent : Agent
     /// <summary>
     /// Sets the reward to the given value and ends the episode
     /// </summary>
-    private void NextEpisode(float _reward)
+    public void NextEpisode(float _reward)
     {
         SetReward(_reward);
         EndEpisode();
