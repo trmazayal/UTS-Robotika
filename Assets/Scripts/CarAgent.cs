@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class CarAgent : Agent
 {
+    private const string HORIZONTAL_MOTION = "Horizontal";
+    private const string VERTICAL_MOTION = "Vertical";
     /// <summary>
     /// private variables
     /// </summary>
@@ -155,7 +157,15 @@ public class CarAgent : Agent
         m_allGrounded = true;
         CheckGrounded();
 
+        // GetMovementInput();
         // InfiniteRewardCheck();
         // CheckMovement();
+    }
+
+    public void GetMovementInput()
+    {
+        m_move.x = Input.GetAxis(HORIZONTAL_MOTION);
+        m_move.y = Input.GetAxis(VERTICAL_MOTION);
+        m_carController.AgentMove(m_move);
     }
 }
