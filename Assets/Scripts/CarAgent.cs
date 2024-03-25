@@ -55,6 +55,7 @@ public class CarAgent : Agent
     {
         m_move.x = Mathf.Clamp(actions.ContinuousActions[0], -1f, 1f);
         m_move.y = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
+        // Debug.Log("Move: " + m_move.x + " " + m_move.y);
         m_carController.AgentMove(m_move);
     }
 
@@ -75,8 +76,8 @@ public class CarAgent : Agent
         sensor.AddObservation(m_obstacleHit);
         sensor.AddObservation(m_steps);
 
-        sensor.AddObservation(m_checkpointManager.TimeLeft);
-        sensor.AddObservation(m_checkpointManager.MaxTimeToReachNextCheckpoint);
+        // sensor.AddObservation(m_checkpointManager.TimeLeft);
+        // sensor.AddObservation(m_checkpointManager.MaxTimeToReachNextCheckpoint);
 
         sensor.AddObservation(m_allGrounded);
     }

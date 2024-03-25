@@ -177,8 +177,9 @@ public class WheelVehicle : MonoBehaviour
 
 
         throttle = m_movement.y;
+        // Debug.Log("Throttle = " + throttle);
         steering = turnInputCurve.Evaluate(m_movement.x) * steerAngle;
-
+        // Debug.Log("Steering = " + steering);
 
         // Direction
         foreach (WheelCollider wheel in turnWheel)
