@@ -74,4 +74,24 @@ public class CheckpointManager : MonoBehaviour
             
         }
     }
+
+    public Checkpoint GetLastCheckpoint()
+    {
+        return lastCheckpoint;
+    }
+
+    public Checkpoint GetNextCheckpoint()
+    {
+        return nextCheckPointToReach;
+    }
+
+    public int GetCurrentCheckpointIndex()
+    {
+        return CurrentCheckpointIndex;
+    }
+
+    public int GetCheckpointsCount()
+    {
+        return Checkpoints.Count;
+    }
 }

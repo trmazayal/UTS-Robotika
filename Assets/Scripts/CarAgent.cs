@@ -24,6 +24,8 @@ public class CarAgent : Agent
     private Rigidbody m_carRigidbody;
     private WheelCollider[] m_wheelColliders;
     private WheelHit m_out;
+    private Checkpoint lastCheckpoint;
+    public Checkpoint nextCheckPointToReach;
 
     public override void Initialize()
     {
@@ -100,6 +102,19 @@ public class CarAgent : Agent
         {
             m_obstacleHit++;
         }
+        else if (other.collider.CompareTag("Finish"))
+        {
+            if (m_checkpointManager.GetCurrentCheckpointIndex() >= m_checkpointManager.GetCheckpointsCount())
+            {
+                AddReward(1f);
+                NextEpisode(1f);
+            }
+            else
+            {
+                AddReward(-0.5f);
+                NextEpisode(-1f);
+            }
+        }
     }
 
     /// <summary>
@@ -107,11 +122,7 @@ public class CarAgent : Agent
     /// </summary>
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Finish"))
-        {
-        }
-
-        else if (other.CompareTag("Checkpoint"))
+        if (other.CompareTag("Checkpoint"))
         {
         }
 
