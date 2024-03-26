@@ -51,6 +51,7 @@ public class CheckpointManager : MonoBehaviour
         lastCheckpoint = Checkpoints[CurrentCheckpointIndex];
         reachedCheckpoint?.Invoke(checkpoint);
         CurrentCheckpointIndex++;
+        carAgent.setCheckpointIndex(CurrentCheckpointIndex);
 
         if (CurrentCheckpointIndex >= Checkpoints.Count)
         {
@@ -62,6 +63,7 @@ public class CheckpointManager : MonoBehaviour
             // Debug.Log("Correct Checkpoint! "+ checkpoint.name);
             carAgent.AddReward((0.5f) / Checkpoints.Count);
             SetNextCheckpoint();
+
         }
     }
 
