@@ -25,7 +25,9 @@ public class CheckpointManager : MonoBehaviour
 
     public void ResetCheckpoints()
     {
+        // Debug.Log("Before Reset: " + CurrentCheckpointIndex);
         CurrentCheckpointIndex = 0;
+        // Debug.Log("After Reset: " + CurrentCheckpointIndex);
         TimeLeft = MaxTimeToReachNextCheckpoint;
         
         SetNextCheckpoint();
@@ -35,35 +37,45 @@ public class CheckpointManager : MonoBehaviour
     {
         TimeLeft -= Time.deltaTime;
 
-        if (TimeLeft < 0f)
-        {
-            carAgent.AddReward(-1f);
-            carAgent.EndEpisode();
-        }
+        // if (TimeLeft < 0f)
+        // {
+        //     Debug.Log("Time Ran Out!");
+        //     carAgent.NextEpisode(-1f);
+        // }
     }
 
     public void CheckPointReached(Checkpoint checkpoint)
     {
-        if (nextCheckPointToReach != checkpoint) {
-            // Debug.Log("Wrong Checkpoint!"+ checkpoint.name + " Expected: " + nextCheckPointToReach.name);
-            carAgent.AddReward(-1f);
-            carAgent.EndEpisode();
+        lastCheckpoint = Checkpoints[CurrentCheckpointIndex];
+
+        if (Checkpoints.IndexOf(checkpoint) < Checkpoints.IndexOf(lastCheckpoint)) {
             return;
         }
-        lastCheckpoint = Checkpoints[CurrentCheckpointIndex];
+        else if (nextCheckPointToReach != checkpoint) {
+            Debug.Log("Wrong Checkpoint!"+ checkpoint.name + " Expected: " + nextCheckPointToReach.name);
+            carAgent.AddReward(-1f);
+            carAgent.m_currentReward += -1f;
+            // carAgent.EndEpisode();
+            return;
+        }
+
+        
         reachedCheckpoint?.Invoke(checkpoint);
         CurrentCheckpointIndex++;
         carAgent.setCheckpointIndex(CurrentCheckpointIndex);
 
         if (CurrentCheckpointIndex >= Checkpoints.Count)
         {
-            carAgent.AddReward(1f);
-            carAgent.EndEpisode();
+            // carAgent.AddReward(1f);
+            // carAgent.EndEpisode();
         }
         else
         {
-            // Debug.Log("Correct Checkpoint! "+ checkpoint.name);
-            carAgent.AddReward(1f);
+            Debug.Log("Correct Checkpoint! "+ checkpoint.name);
+            // Debug.Log("Before Checkpoint! "+ carAgent.m_currentReward);
+            carAgent.AddReward(10f);
+            carAgent.m_currentReward += 10f;
+            // Debug.Log("After Checkpoint! "+ carAgent.m_currentReward);
             SetNextCheckpoint();
 
         }
@@ -75,9 +87,20 @@ public class CheckpointManager : MonoBehaviour
         {
             TimeLeft = MaxTimeToReachNextCheckpoint;
             nextCheckPointToReach = Checkpoints[CurrentCheckpointIndex];
-            
+            // Debug.Log("After Set Checkpoint: " + CurrentCheckpointIndex);
         }
     }
+
+    private void ResetNextCheckpoint()
+    {
+        if (Checkpoints.Count > 0)
+        {
+            TimeLeft = MaxTimeToReachNextCheckpoint;
+            nextCheckPointToReach = Checkpoints[0];
+            Debug.Log("Reset Checkpoint: " + Checkpoints.IndexOf(nextCheckPointToReach));
+        }
+    }
+
 
     public Checkpoint GetLastCheckpoint()
     {

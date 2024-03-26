@@ -14,11 +14,11 @@ public class CarAgent : Agent
 
     [SerializeField] private bool m_allGrounded = false;
     [SerializeField] private int m_obstacleHit;
-    [SerializeField] private float m_currentReward;
+    [SerializeField] public float m_currentReward;
     [SerializeField] private int m_nextCheckpointNumber;
 
     private SpawnPointManager m_spawnPointManager;
-    private CheckpointManager m_checkpointManager;
+    public CheckpointManager m_checkpointManager;
 
     private WheelVehicle m_carController;
     private int m_steps;
@@ -33,7 +33,6 @@ public class CarAgent : Agent
     public override void Initialize()
     {
         m_spawnPointManager = FindObjectOfType<SpawnPointManager>();
-        m_checkpointManager = FindObjectOfType<CheckpointManager>();
         m_carController = GetComponent<WheelVehicle>();
         m_carRigidbody = GetComponentInChildren<Rigidbody>();
         m_wheelColliders = GetComponentsInChildren<WheelCollider>();
@@ -106,7 +105,7 @@ public class CarAgent : Agent
     }
 
     private void PrivateVariableReset()
-    {
+    {        
         // Step count of episode
         m_steps = 0;
 
@@ -132,6 +131,32 @@ public class CarAgent : Agent
         {
             // m_currentReward += -0.01f;
             AddReward(-0.1f);
+            m_currentReward += -0.1f;
+        }
+        else if (collision.collider.CompareTag("Finish"))
+        {
+            if (m_checkpointManager.GetCurrentCheckpointIndex() >= m_checkpointManager.GetCheckpointsCount())
+            {
+                Debug.Log("Reached the final target");
+                // A set reward for reaching the final target + extra reward based on how quickly the agent reached the target
+                m_currentReward += 1f + ((30f * m_nextCheckpointNumber) / Mathf.Clamp(m_steps, 1, Mathf.Infinity));
+                AddReward(1f + ((30f * m_nextCheckpointNumber) / Mathf.Clamp(m_steps, 1, Mathf.Infinity)));
+                EndEpisode();
+            }
+            // If agent reaches the final target without clearing the previous checkpoints
+            else
+            {
+                Debug.Log("Reached the final target without clearing all checkpoints");
+                AddReward(-0.1f);
+                m_currentReward += -0.1f;
+            }
+        }
+
+        if (collision.collider.CompareTag("Wall"))
+        {
+            // m_currentReward += -0.01f;
+            AddReward(-0.1f);
+            m_currentReward += -0.1f;
         }
     }
 
@@ -140,15 +165,23 @@ public class CarAgent : Agent
     /// </summary>
     private void OnCollisionEnter(Collision other)
     {
+
+        if (other.collider.CompareTag("Wall"))
+        {
+            AddReward(-0.5f);
+            m_currentReward += -0.5f;
+        }
+
         if (other.collider.CompareTag("Terrain"))
         {
             //Debug.Log("Collided with obstacle, negative reward = " + (-1f * (m_obstacleHit + 1) * (m_currentReward / 5f)));
-
+            AddReward(-0.5f);
+            m_currentReward += -0.5f;
             // Reset reward to -1 if agent hits obstacle
-            m_currentReward += -1f * (m_obstacleHit + 1) * (m_currentReward / 10f);
-            AddReward(-1f * (m_obstacleHit + 1) * (m_currentReward / 10f));
+            // m_currentReward += -1f * (m_obstacleHit + 1) * (m_currentReward / 10f);
+            // AddReward(-1f * (m_obstacleHit + 1) * (m_currentReward / 10f));
             // AddReward(-0.5f);
-            m_obstacleHit++;
+            // m_obstacleHit++;
         }
         else if (other.collider.CompareTag("Finish"))
         {
@@ -164,7 +197,8 @@ public class CarAgent : Agent
             else
             {
                 Debug.Log("Reached the final target without clearing all checkpoints");
-                NextEpisode(-1f);
+                AddReward(-1f);
+                m_currentReward += -1f;
             }
         }
     }
@@ -183,8 +217,8 @@ public class CarAgent : Agent
 
                 // A set reward for reaching the checkpoint + extra reward based on how quickly the agent reached the checkpoint 
                 // and how many obstacles it was able to avoid completely
-                m_currentReward += (0.5f + ((20f * m_nextCheckpointNumber) / Mathf.Clamp(m_steps, 1, Mathf.Infinity)));
-                AddReward(0.5f + ((20f * m_nextCheckpointNumber) / Mathf.Clamp(m_steps, 1, Mathf.Infinity)));
+                // m_currentReward += (0.5f + ((20f * m_nextCheckpointNumber) / Mathf.Clamp(m_steps, 1, Mathf.Infinity)));
+                // AddReward(0.5f + ((20f * m_nextCheckpointNumber) / Mathf.Clamp(m_steps, 1, Mathf.Infinity)));
 
                 m_nextCheckpointNumber++;
 
@@ -192,10 +226,10 @@ public class CarAgent : Agent
         }
 
         // Colliding with outermost boundary
-        else if (other.CompareTag("Respawn"))
-        {
-            NextEpisode(-1f);
-        }
+        // else if (other.CompareTag("Respawn"))
+        // {
+        //     NextEpisode(-1f);
+        // }
     }
 
     private void CheckMovement()
@@ -224,11 +258,11 @@ public class CarAgent : Agent
             m_deadCounter = 0;
         }
 
-        if (m_deadCounter >= 500)
-        {
-            m_currentReward += -0.001f;
-            AddReward(-0.001f);
-        }
+        // if (m_deadCounter >= 500)
+        // {
+        //     m_currentReward += -0.001f;
+        //     AddReward(-0.001f);
+        // }
     }
     /// <summary>
     /// Checks if all wheel colliders are grounded and if all wheels are touching the road or not
@@ -243,7 +277,7 @@ public class CarAgent : Agent
                 if (m_out.collider.CompareTag("Road"))
                 {
                     m_allGrounded = true;
-                    AddReward(0.001f);
+                    // AddReward(0.001f);
                 }
                 else
                 {
@@ -278,6 +312,7 @@ public class CarAgent : Agent
     public void NextEpisode(float _reward)
     {
         SetReward(_reward);
+        m_currentReward = _reward;
         EndEpisode();
     }
 
@@ -290,7 +325,7 @@ public class CarAgent : Agent
 
         // GetMovementInput();
         // InfiniteRewardCheck();
-        CheckMovement();
+        // CheckMovement();
     }
 
     public void GetMovementInput()
