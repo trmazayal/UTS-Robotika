@@ -18,10 +18,10 @@ TagManager:
   - 
   - 
   - Agent
-  - Ground
-  - CheckPoint
-  - Spawnpoint
-  - Wall
+  - Grounds
+  - Checkpoints
+  - Spawnpoints
+  - Walls
   - 
   - 
   - 

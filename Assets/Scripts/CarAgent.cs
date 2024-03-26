@@ -73,6 +73,9 @@ public class CarAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
+        Vector3 checkpointForward = m_checkpointManager.GetNextCheckpoint().transform.forward;
+        float directionDot = Vector3.Dot(checkpointForward, transform.forward);
+        sensor.AddObservation(directionDot);
         // Distance to incoming checkpoint
         // sensor.AddObservation(m_distanceToTarget / 30f); // float
 
@@ -127,8 +130,8 @@ public class CarAgent : Agent
         // Adds negative reward if agent tries to move by pushing the obstacle
         if (collision.collider.CompareTag("Terrain"))
         {
-            m_currentReward += -0.01f;
-            AddReward(-0.01f);
+            // m_currentReward += -0.01f;
+            AddReward(-0.1f);
         }
     }
 
@@ -144,13 +147,14 @@ public class CarAgent : Agent
             // Reset reward to -1 if agent hits obstacle
             m_currentReward += -1f * (m_obstacleHit + 1) * (m_currentReward / 10f);
             AddReward(-1f * (m_obstacleHit + 1) * (m_currentReward / 10f));
-
+            // AddReward(-0.5f);
             m_obstacleHit++;
         }
         else if (other.collider.CompareTag("Finish"))
         {
             if (m_checkpointManager.GetCurrentCheckpointIndex() >= m_checkpointManager.GetCheckpointsCount())
             {
+                Debug.Log("Reached the final target");
                 // A set reward for reaching the final target + extra reward based on how quickly the agent reached the target
                 m_currentReward += 1f + ((30f * m_nextCheckpointNumber) / Mathf.Clamp(m_steps, 1, Mathf.Infinity));
                 AddReward(1f + ((30f * m_nextCheckpointNumber) / Mathf.Clamp(m_steps, 1, Mathf.Infinity)));
@@ -159,6 +163,7 @@ public class CarAgent : Agent
             // If agent reaches the final target without clearing the previous checkpoints
             else
             {
+                Debug.Log("Reached the final target without clearing all checkpoints");
                 NextEpisode(-1f);
             }
         }
@@ -238,6 +243,7 @@ public class CarAgent : Agent
                 if (m_out.collider.CompareTag("Road"))
                 {
                     m_allGrounded = true;
+                    AddReward(0.001f);
                 }
                 else
                 {

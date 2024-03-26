@@ -46,6 +46,8 @@ public class CheckpointManager : MonoBehaviour
     {
         if (nextCheckPointToReach != checkpoint) {
             // Debug.Log("Wrong Checkpoint!"+ checkpoint.name + " Expected: " + nextCheckPointToReach.name);
+            carAgent.AddReward(-1f);
+            carAgent.EndEpisode();
             return;
         }
         lastCheckpoint = Checkpoints[CurrentCheckpointIndex];
@@ -55,13 +57,13 @@ public class CheckpointManager : MonoBehaviour
 
         if (CurrentCheckpointIndex >= Checkpoints.Count)
         {
-            carAgent.AddReward(0.5f);
+            carAgent.AddReward(1f);
             carAgent.EndEpisode();
         }
         else
         {
             // Debug.Log("Correct Checkpoint! "+ checkpoint.name);
-            carAgent.AddReward((0.5f) / Checkpoints.Count);
+            carAgent.AddReward(1f);
             SetNextCheckpoint();
 
         }
