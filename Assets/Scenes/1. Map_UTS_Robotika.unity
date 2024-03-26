@@ -32824,8 +32824,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9197b2e4e76555a478de369cf74b3f37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxTimeToReachNextCheckpoint: 3000
-  TimeLeft: 3000
+  MaxTimeToReachNextCheckpoint: 30
+  TimeLeft: 30
   carAgent: {fileID: 8252310053325237794}
   nextCheckPointToReach: {fileID: 0}
 --- !u!114 &8252310053325237794

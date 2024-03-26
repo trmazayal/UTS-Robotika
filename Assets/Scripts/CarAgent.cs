@@ -55,16 +55,14 @@ public class CarAgent : Agent
     {
         m_move.x = Mathf.Clamp(actions.ContinuousActions[0], -1f, 1f);
         m_move.y = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
-        // Debug.Log("Move: " + m_move.x + " " + m_move.y);
         m_carController.AgentMove(m_move);
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
-        var _actionsOut = actionsOut.ContinuousActions;
-        _actionsOut[0] = m_move.x;
-        _actionsOut[1] = m_move.y;
-        m_carController.AgentMove(m_move);
+        var continuousActionsOut = actionsOut.ContinuousActions;
+        continuousActionsOut[0] = Input.GetAxis(HORIZONTAL_MOTION);
+        continuousActionsOut[1] = Input.GetAxis(VERTICAL_MOTION);
     }
 
     public override void CollectObservations(VectorSensor sensor)
