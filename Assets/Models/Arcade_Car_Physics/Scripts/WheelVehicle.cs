@@ -167,6 +167,21 @@ public class WheelVehicle : MonoBehaviour
         return (driveWheel[0].motorTorque / 602f);
     }
 
+    [Header("Sensors")]
+    public float sensorLength = 15f;
+    public Vector3 frontCenterSensorPos = new Vector3(0f, 0, 1.5f);
+    public float frontSideSensorPos = 1f;
+    public float frontSideAngle = 45f;
+    public float frontSideAngle2 = 90f;
+    public Vector3 rearLeftSensorLocation = new Vector3(-1f, 0, -1.8f);
+    public Vector3 rearRightSensorLocation = new Vector3(1f, 0, -1.8f);
+    public float rearSideAngle = 20f;
+
+    private bool avoiding = false;
+    private bool turnLeft = false;
+    private bool turnRight = false;
+    private int randomTurn = 0;
+
     // Update everything
     void FixedUpdate()
     {
@@ -178,7 +193,79 @@ public class WheelVehicle : MonoBehaviour
 
         throttle = m_movement.y;
         // Debug.Log("Throttle = " + throttle);
-        steering = turnInputCurve.Evaluate(m_movement.x) * steerAngle;
+
+        // Implementing the steering with sensors
+        if (IsGrounded){
+            RaycastHit hit;
+            Vector3 sensorStartPos = transform.position + transform.forward * frontCenterSensorPos.z + transform.up * frontCenterSensorPos.y;
+            turnLeft = false;
+            turnRight = false;
+            avoiding = false;
+
+            // Front center sensor
+            if (Physics.Raycast(sensorStartPos, transform.forward, out hit, sensorLength))
+            {
+                if (hit.collider.CompareTag("Terrain"))
+                {
+                    Debug.DrawLine(sensorStartPos, hit.point, Color.blue);
+                    avoiding = true;
+                    randomTurn = Random.Range(0, 1);
+                    if (randomTurn == 0)
+                    {
+                        turnLeft = true;
+                    }
+                    else
+                    {
+                        turnRight = true;
+                    }
+                    Debug.Log("Front center sensor");
+                }
+            }
+
+            // Front right sensor
+            sensorStartPos = transform.position + transform.forward * frontCenterSensorPos.z + transform.right * frontSideSensorPos + transform.up * frontCenterSensorPos.y;
+            if (Physics.Raycast(sensorStartPos, Quaternion.AngleAxis(frontSideAngle, transform.up) * transform.forward, out hit, sensorLength))
+            {
+                if (hit.collider.CompareTag("Terrain"))
+                {
+                    Debug.DrawLine(sensorStartPos, hit.point, Color.blue);
+                    turnLeft = true;
+                    avoiding = true;
+                    Debug.Log("Front right sensor");
+                }
+            }
+
+            // Front left sensor
+            sensorStartPos = transform.position + transform.forward * frontCenterSensorPos.z - transform.right * frontSideSensorPos + transform.up * frontCenterSensorPos.y;
+            if (Physics.Raycast(sensorStartPos, Quaternion.AngleAxis(-frontSideAngle, transform.up) * transform.forward, out hit, sensorLength))
+            {
+                if (hit.collider.CompareTag("Terrain"))
+                {
+                    Debug.DrawLine(sensorStartPos, hit.point, Color.blue);
+                    turnRight = true;
+                    avoiding = true;
+                    Debug.Log("Front left sensor");
+                }
+            }
+        }
+        // if (avoiding)
+        // {
+        //     if (turnLeft)
+        //     {
+        //         steering = turnInputCurve.Evaluate(-1) * steerAngle;
+        //     }
+        //     else if (turnRight)
+        //     {
+        //         steering = turnInputCurve.Evaluate(1) * steerAngle;
+        //     }
+        // }
+        // else
+            steering = turnInputCurve.Evaluate(m_movement.x) * steerAngle;
+
+        throttle = m_movement.y;
+        
+
+        // steering = turnInputCurve.Evaluate(m_movement.x) * steerAngle;
         // Debug.Log("Steering = " + steering);
 
         // Direction
