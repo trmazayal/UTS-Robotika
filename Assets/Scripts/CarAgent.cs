@@ -8,9 +8,6 @@ public class CarAgent : Agent
 {
     private const string HORIZONTAL_MOTION = "Horizontal";
     private const string VERTICAL_MOTION = "Vertical";
-    /// <summary>
-    /// private variables
-    /// </summary>
 
     [SerializeField] private bool m_allGrounded = false;
     [SerializeField] private int m_obstacleHit;
@@ -27,8 +24,6 @@ public class CarAgent : Agent
     private Rigidbody m_carRigidbody;
     private WheelCollider[] m_wheelColliders;
     private WheelHit m_out;
-    // private Checkpoint lastCheckpoint;
-    // public Checkpoint nextCheckPointToReach;
 
     public override void Initialize()
     {
@@ -75,8 +70,6 @@ public class CarAgent : Agent
         Vector3 checkpointForward = m_checkpointManager.GetNextCheckpoint().transform.forward;
         float directionDot = Vector3.Dot(checkpointForward, transform.forward);
         sensor.AddObservation(directionDot);
-        // Distance to incoming checkpoint
-        // sensor.AddObservation(m_distanceToTarget / 30f); // float
 
         // Agent's normalized local position
         sensor.AddObservation(new Vector2(transform.localPosition.x / 500f, transform.localPosition.z / 500f)); // vec2
@@ -84,24 +77,6 @@ public class CarAgent : Agent
         // Agent's normalized torque and steering angle
         sensor.AddObservation(m_carController.GetTorque()); //float
         sensor.AddObservation(m_carController.GetSteeringAngle()); //float
-
-        // Calculate the direction to incoming checkpoint
-        // m_dirToTarget = (m_checkpointPos - transform.localPosition).normalized;
-
-        // Dot product of agent forward and direction to incoming checkpoint/target
-        // sensor.AddObservation(Vector3.Dot(transform.forward, m_dirToTarget)); //float
-
-        // sensor.AddObservation(m_carRigidbody.velocity);
-        // sensor.AddObservation(m_carRigidbody.angularVelocity);
-        // sensor.AddObservation(m_carRigidbody.position);
-        // sensor.AddObservation(m_carRigidbody.rotation);
-        // sensor.AddObservation(m_obstacleHit);
-        // sensor.AddObservation(m_steps);
-
-        // sensor.AddObservation(m_checkpointManager.TimeLeft);
-        // sensor.AddObservation(m_checkpointManager.MaxTimeToReachNextCheckpoint);
-
-        // sensor.AddObservation(m_allGrounded);
     }
 
     private void PrivateVariableReset()
@@ -174,14 +149,9 @@ public class CarAgent : Agent
 
         if (other.collider.CompareTag("Terrain"))
         {
-            //Debug.Log("Collided with obstacle, negative reward = " + (-1f * (m_obstacleHit + 1) * (m_currentReward / 5f)));
             AddReward(-0.5f);
             m_currentReward += -0.5f;
-            // Reset reward to -1 if agent hits obstacle
-            // m_currentReward += -1f * (m_obstacleHit + 1) * (m_currentReward / 10f);
-            // AddReward(-1f * (m_obstacleHit + 1) * (m_currentReward / 10f));
-            // AddReward(-0.5f);
-            // m_obstacleHit++;
+            m_obstacleHit++;
         }
         else if (other.collider.CompareTag("Finish"))
         {
@@ -213,36 +183,16 @@ public class CarAgent : Agent
             // If agent collided with the right checkpoint
             if (other.GetComponent<Checkpoint>().Equals(m_checkpointManager.GetNextCheckpoint()))
             {
-                //Debug.Log("Good Checkpoint " + m_nextcheckpointnumber);
-
-                // A set reward for reaching the checkpoint + extra reward based on how quickly the agent reached the checkpoint 
-                // and how many obstacles it was able to avoid completely
-                // m_currentReward += (0.5f + ((20f * m_nextCheckpointNumber) / Mathf.Clamp(m_steps, 1, Mathf.Infinity)));
-                // AddReward(0.5f + ((20f * m_nextCheckpointNumber) / Mathf.Clamp(m_steps, 1, Mathf.Infinity)));
-
                 m_nextCheckpointNumber++;
 
             }
         }
-
-        // Colliding with outermost boundary
-        // else if (other.CompareTag("Respawn"))
-        // {
-        //     NextEpisode(-1f);
-        // }
     }
 
     private void CheckMovement()
     {
-        // CheckDistanceFromCheckpoint();
-
         if (m_carRigidbody.velocity.magnitude > 1f)
         {
-            // Reward based on how far the agent is from the middle of road
-            //m_currentReward += (1f / (3000f * m_laneOffset * m_laneOffset * m_laneOffset));
-            //AddReward(1f / (3000f * m_laneOffset * m_laneOffset * m_laneOffset));
-
-            // Reward based on the agent moving in the forward direction 
             m_currentReward += (0.0005f * ((Vector3.Dot(m_carRigidbody.velocity.normalized, transform.forward) / 2f) + 0.5f));
             AddReward((0.0005f * ((Vector3.Dot(m_carRigidbody.velocity.normalized, transform.forward) / 2f) + 0.5f)));
         }
@@ -257,12 +207,6 @@ public class CarAgent : Agent
         {
             m_deadCounter = 0;
         }
-
-        // if (m_deadCounter >= 500)
-        // {
-        //     m_currentReward += -0.001f;
-        //     AddReward(-0.001f);
-        // }
     }
     /// <summary>
     /// Checks if all wheel colliders are grounded and if all wheels are touching the road or not
@@ -322,10 +266,6 @@ public class CarAgent : Agent
         m_steps++;
         m_allGrounded = true;
         CheckGrounded();
-
-        // GetMovementInput();
-        // InfiniteRewardCheck();
-        // CheckMovement();
     }
 
     public void GetMovementInput()

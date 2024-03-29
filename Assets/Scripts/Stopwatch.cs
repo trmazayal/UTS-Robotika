@@ -1,10 +1,18 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
 
 public class Stopwatch : MonoBehaviour
 {
     public float elapsedTime = 0.0f;
+    public float prevLabTime = 0.0f;
+    List<float> lapTimes = new List<float>();
     public Text stopwatchText;
+    public Text prevLabTimeText;
+    public Text bestLabTimeText;
+
+
     public bool TimerOn = true;
 
 
@@ -33,6 +41,13 @@ public class Stopwatch : MonoBehaviour
         if (collision.transform.CompareTag("Player"))
         {
             TimerOn = false;
+            lapTimes.Add(elapsedTime);
+            prevLabTime = elapsedTime;
+            prevLabTimeText.text = "Previous: " + FormatTime(prevLabTime);
+            lapTimes.Sort();
+            bestLabTimeText.text = "Best: " + FormatTime(lapTimes[0]);
+            elapsedTime = 0.0f;
+            TimerOn = true;
         }
     }
 
