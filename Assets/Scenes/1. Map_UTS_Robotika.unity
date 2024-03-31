@@ -8244,7 +8244,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 573370868}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.0031495094, y: 1.7916126, z: 1.6403017}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -38058,8 +38058,8 @@ GameObject:
   - component: {fileID: 4569596825200277382}
   - component: {fileID: 4569596825200277400}
   - component: {fileID: 4569596825200277402}
-  - component: {fileID: 4569596825200277401}
   - component: {fileID: 4569596825200277405}
+  - component: {fileID: 4569596825200277401}
   - component: {fileID: 8252310053325237794}
   m_Layer: 8
   m_Name: Player
@@ -38092,7 +38092,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4569596825200277380}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.0031495094, y: -1.2416127, z: 2.2596984}
+  m_LocalPosition: {x: 0, y: 0.55, z: 3.9}
   m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children:
